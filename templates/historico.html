@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Histórico{% endblock %}
+{% block heading %}Histórico de triagens{% endblock %}
+{% block subheading %}<p class="form-hint">Registro de todas as triagens realizadas — requisito funcional (f) do sistema.</p>{% endblock %}
+
+{% block content %}
+<div class="card" style="padding:0;">
+  {% if triagens %}
+  <table>
+    <thead><tr><th>Data</th><th>Paciente</th><th>Prioridade</th><th>Condição sugerida</th><th>Confiança</th><th></th></tr></thead>
+    <tbody>
+      {% for t in triagens %}
+      <tr>
+        <td>{{ t.criado_em.replace('T', ' ') }}</td>
+        <td>{{ t.paciente_nome }}</td>
+        <td><span class="priority-badge p-{{ t.prioridade }}"><span class="dot"></span>{{ t.prioridade_label }}</span></td>
+        <td>{{ t.condicao_sugerida }}</td>
+        <td>{{ t.confianca_prioridade }}%</td>
+        <td><a class="btn btn-secondary" style="padding:6px 12px;font-size:12.5px;" href="{{ url_for('triagem_resultado', triagem_id=t.id) }}">Ver</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">Nenhuma triagem registrada ainda.</div>
+  {% endif %}
+</div>
+{% endblock %}

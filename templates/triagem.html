@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Triagem{% endblock %}
+{% block heading %}Triagem — {{ paciente.nome }}{% endblock %}
+{% block subheading %}<p class="form-hint">Informe os sinais vitais e os sintomas relatados pelo paciente.</p>{% endblock %}
+
+{% block content %}
+<form method="post">
+  <div class="card" style="margin-bottom: 20px;">
+    <h3>Sinais vitais</h3>
+    <div class="vitals-grid">
+      <div class="form-group">
+        <label for="temperatura">Temperatura corporal (°C)</label>
+        <input type="number" step="0.1" id="temperatura" name="temperatura" value="{{ form.temperatura or '36.6' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="freq_cardiaca">Frequência cardíaca (bpm)</label>
+        <input type="number" id="freq_cardiaca" name="freq_cardiaca" value="{{ form.freq_cardiaca or '80' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="spo2">Saturação de O₂ (%)</label>
+        <input type="number" id="spo2" name="spo2" value="{{ form.spo2 or '97' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="pas">Pressão arterial sistólica (mmHg)</label>
+        <input type="number" id="pas" name="pas" value="{{ form.pas or '120' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="pad">Pressão arterial diastólica (mmHg)</label>
+        <input type="number" id="pad" name="pad" value="{{ form.pad or '80' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="consciencia">Nível de consciência</label>
+        <select id="consciencia" name="consciencia">
+          <option value="Alerta">Alerta</option>
+          <option value="Resposta_a_voz">Responde à voz</option>
+          <option value="Resposta_a_dor">Responde à dor</option>
+          <option value="Nao_responsivo">Não responsivo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h3>Sintomas relatados</h3>
+    <p class="form-hint" style="margin-bottom:14px;">Selecione todos os sintomas identificados durante a avaliação.</p>
+    <div class="symptom-grid">
+      {% for chave in sintomas_lista %}
+      <label class="symptom-check">
+        <input type="checkbox" name="sintomas" value="{{ chave }}">
+        {{ sintomas_labels[chave] }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <div class="form-group" style="margin-bottom:0;">
+      <label for="observacoes">Observações adicionais (opcional)</label>
+      <textarea id="observacoes" name="observacoes" rows="3">{{ form.observacoes or '' }}</textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" type="submit">Processar triagem com IA →</button>
+    <a class="btn btn-secondary" href="{{ url_for('pacientes_lista') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

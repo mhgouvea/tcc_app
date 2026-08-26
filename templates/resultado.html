@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Resultado da triagem{% endblock %}
+{% block heading %}Resultado da triagem — {{ triagem.paciente_nome }}{% endblock %}
+{% block subheading %}<p class="form-hint">Sugestão gerada pelo modelo de IA (Random Forest) em {{ triagem.criado_em.replace('T',' ') }}.</p>{% endblock %}
+
+{% block content %}
+<div class="result-hero p-{{ triagem.prioridade }}">
+  <div class="eyebrow">Prioridade de atendimento sugerida</div>
+  <h2>{{ triagem.prioridade_label }}</h2>
+  <div class="time">Meta de atendimento: {{ {1:'Imediato',2:'Até 10 min',3:'Até 60 min',4:'Até 120 min',5:'Até 240 min'}[triagem.prioridade] }}</div>
+  <div class="confidence-bar"><span style="width: {{ triagem.confianca_prioridade }}%;"></span></div>
+  <div class="time" style="margin-top:6px;">Confiança do modelo: {{ triagem.confianca_prioridade }}%</div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="section-title" style="margin-top:0;">Condição clínica sugerida</div>
+    <h3 style="font-size:19px;">{{ triagem.condicao_sugerida }}</h3>
+    <div class="confidence-bar" style="background: var(--line);"><span style="width: {{ triagem.confianca_condicao }}%; background: var(--accent);"></span></div>
+    <p class="form-hint">Confiança do modelo: {{ triagem.confianca_condicao }}%</p>
+  </div>
+  <div class="card">
+    <div class="section-title" style="margin-top:0;">Decisão do profissional</div>
+    <form method="post">
+      <div class="form-group">
+        <select name="decisao_profissional">
+          <option value="">Selecione a conduta adotada</option>
+          <option value="Acatou sugestão do sistema" {{ 'selected' if triagem.decisao_profissional == 'Acatou sugestão do sistema' }}>Acatou a sugestão do sistema</option>
+          <option value="Ajustou prioridade" {{ 'selected' if triagem.decisao_profissional == 'Ajustou prioridade' }}>Ajustou a prioridade manualmente</option>
+          <option value="Divergiu da sugestão" {{ 'selected' if triagem.decisao_profissional == 'Divergiu da sugestão' }}>Divergiu da sugestão do sistema</option>
+        </select>
+      </div>
+      <button class="btn" type="submit">Registrar decisão</button>
+    </form>
+  </div>
+</div>
+
+<div class="section-title">Sinais vitais informados</div>
+<div class="vitals-strip" style="margin-bottom: 24px;">
+  <div class="cell"><div class="v">{{ triagem.temperatura }}°</div><div class="l">Temp.</div></div>
+  <div class="cell"><div class="v">{{ triagem.freq_cardiaca }}</div><div class="l">FC bpm</div></div>
+  <div class="cell"><div class="v">{{ triagem.pas }}/{{ triagem.pad }}</div><div class="l">PA mmHg</div></div>
+  <div class="cell"><div class="v">{{ triagem.spo2 }}%</div><div class="l">SpO₂</div></div>
+  <div class="cell"><div class="v" style="font-size:14px;">{{ triagem.consciencia.replace('_',' ') }}</div><div class="l">Consciência</div></div>
+  <div class="cell"><div class="v" style="font-size:14px;">#{{ triagem.id }}</div><div class="l">Registro</div></div>
+</div>
+
+<div class="section-title">Sintomas relatados</div>
+<div class="card" style="margin-bottom: 24px;">
+  {% if sintomas_marcados %}
+    {% for s in sintomas_marcados %}<span class="priority-badge p-4" style="margin: 0 6px 6px 0;"><span class="dot"></span>{{ s }}</span>{% endfor %}
+  {% else %}
+    <span class="form-hint">Nenhum sintoma adicional informado.</span>
+  {% endif %}
+  {% if triagem.observacoes %}
+    <p style="margin-top:16px; padding-top:16px; border-top:1px solid var(--line);"><strong>Observações:</strong> {{ triagem.observacoes }}</p>
+  {% endif %}
+</div>
+
+<div class="disclaimer">
+  <strong>Aviso:</strong> esta sugestão foi gerada por um modelo de aprendizado de máquina treinado com dados
+  <strong>simulados</strong>, no contexto de um trabalho acadêmico. Ela deve ser interpretada como apoio à
+  decisão — a responsabilidade pela classificação final e pela conduta clínica é sempre do profissional de
+  saúde responsável pelo atendimento (BERNER, 2009).
+</div>
+
+<div class="btn-row" style="margin-top: 24px;">
+  <a class="btn btn-secondary" href="{{ url_for('paciente_detalhe', paciente_id=triagem.paciente_id) }}">Ver histórico do paciente</a>
+  <a class="btn btn-secondary" href="{{ url_for('pacientes_lista') }}">Voltar para pacientes</a>
+</div>
+{% endblock %}

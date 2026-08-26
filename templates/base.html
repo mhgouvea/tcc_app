@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Triagem IA{% endblock %} · Sistema de Apoio à Decisão Clínica</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">＋</span>
+      <div class="brand-text">
+        <strong>Tr<span class="accent">IA</span>gem</strong>
+        <small>Apoio à decisão clínica</small>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="{{ url_for('index') }}" class="{{ 'is-active' if request.endpoint == 'index' }}">Painel</a>
+      <a href="{{ url_for('pacientes_lista') }}" class="{{ 'is-active' if request.endpoint in ['pacientes_lista','paciente_detalhe'] }}">Pacientes</a>
+      <a href="{{ url_for('paciente_novo') }}" class="{{ 'is-active' if request.endpoint == 'paciente_novo' }}">Nova triagem</a>
+      <a href="{{ url_for('historico') }}" class="{{ 'is-active' if request.endpoint == 'historico' }}">Histórico</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>Protótipo acadêmico · TCC UNIARA</p>
+      <p class="muted">Dados simulados. Não usar em decisões clínicas reais.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>{% block heading %}{% endblock %}</h1>
+        {% block subheading %}{% endblock %}
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for categoria, mensagem in messages %}
+            <div class="flash flash-{{ categoria }}">{{ mensagem }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+</body>
+</html>

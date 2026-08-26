@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Painel{% endblock %}
+{% block heading %}Painel de triagem{% endblock %}
+{% block subheading %}<p class="form-hint">Visão geral do sistema de apoio à decisão clínica.</p>{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom: 28px;">
+  <div class="stat-tile">
+    <div class="num">{{ total_pacientes }}</div>
+    <div class="label">Pacientes cadastrados</div>
+  </div>
+  <div class="stat-tile">
+    <div class="num">{{ total_triagens }}</div>
+    <div class="label">Triagens registradas</div>
+  </div>
+  <div class="stat-tile">
+    <div class="num">RF</div>
+    <div class="label">Modelo · Random Forest</div>
+  </div>
+  <div class="stat-tile">
+    <div class="num">5</div>
+    <div class="label">Níveis de prioridade</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 28px;">
+  <h3 style="margin-bottom:4px;">Iniciar nova triagem</h3>
+  <p class="form-hint">Cadastre o paciente ou selecione um já existente para registrar sinais vitais e sintomas.</p>
+  <div class="btn-row">
+    <a class="btn" href="{{ url_for('paciente_novo') }}">+ Cadastrar paciente e triar</a>
+    <a class="btn btn-secondary" href="{{ url_for('pacientes_lista') }}">Selecionar paciente existente</a>
+  </div>
+</div>
+
+<div class="section-title">Triagens recentes</div>
+<div class="card" style="padding:0;">
+  {% if triagens_recentes %}
+  <table>
+    <thead>
+      <tr><th>Paciente</th><th>Prioridade</th><th>Condição sugerida</th><th>Registrado em</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for t in triagens_recentes %}
+      <tr>
+        <td>{{ t.paciente_nome }}</td>
+        <td><span class="priority-badge p-{{ t.prioridade }}"><span class="dot"></span>{{ t.prioridade_label }}</span></td>
+        <td>{{ t.condicao_sugerida }}</td>
+        <td>{{ t.criado_em.replace('T', ' ') }}</td>
+        <td><a class="btn btn-secondary" style="padding:6px 12px;font-size:12.5px;" href="{{ url_for('triagem_resultado', triagem_id=t.id) }}">Ver</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">Nenhuma triagem registrada ainda.</div>
+  {% endif %}
+</div>
+
+<div class="disclaimer" style="margin-top: 24px;">
+  Este é um protótipo acadêmico (TCC) treinado com dados clínicos <strong>simulados</strong>.
+  As sugestões apresentadas são apoio à decisão e não substituem, em nenhuma hipótese, o julgamento
+  clínico do profissional de saúde responsável pelo atendimento.
+</div>
+{% endblock %}

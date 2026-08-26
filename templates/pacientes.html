@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Pacientes{% endblock %}
+{% block heading %}Pacientes{% endblock %}
+{% block subheading %}<p class="form-hint">Cadastro e consulta de pacientes.</p>{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 20px;">
+  <form method="get" style="display:flex; gap:10px;">
+    <input type="text" name="busca" placeholder="Buscar por nome..." value="{{ busca }}">
+    <button class="btn" type="submit">Buscar</button>
+    <a class="btn btn-secondary" href="{{ url_for('paciente_novo') }}">+ Novo paciente</a>
+  </form>
+</div>
+
+<div class="card" style="padding:0;">
+  {% if pacientes %}
+  <table>
+    <thead><tr><th>Nome</th><th>Nascimento</th><th>Sexo</th><th>Cartão SUS</th><th></th></tr></thead>
+    <tbody>
+      {% for p in pacientes %}
+      <tr>
+        <td>{{ p.nome }}</td>
+        <td>{{ p.data_nascimento or '—' }}</td>
+        <td>{{ p.sexo or '—' }}</td>
+        <td>{{ p.cartao_sus or '—' }}</td>
+        <td style="display:flex; gap:8px;">
+          <a class="btn" style="padding:6px 12px;font-size:12.5px;" href="{{ url_for('triagem_nova', paciente_id=p.id) }}">Nova triagem</a>
+          <a class="btn btn-secondary" style="padding:6px 12px;font-size:12.5px;" href="{{ url_for('paciente_detalhe', paciente_id=p.id) }}">Histórico</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">Nenhum paciente encontrado.</div>
+  {% endif %}
+</div>
+{% endblock %}
