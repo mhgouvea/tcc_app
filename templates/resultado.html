@@ -35,6 +35,34 @@
   </div>
 </div>
 
+<div class="section-title">Pressão arterial</div>
+<div class="bp-card" style="margin-bottom: 24px;">
+  <div class="bp-top">
+    <div class="bp-reading">{{ pressao.pas }}/{{ pressao.pad }} <small>mmHg</small></div>
+    <div class="bp-badge" style="background: {{ pressao.cor }};">
+      <span class="dot"></span>{{ pressao.categoria }}
+    </div>
+  </div>
+
+  <div class="bp-gauge-track">
+    <div class="bp-gauge-pointer" style="left: {{ pressao.gauge_pct }}%;"></div>
+  </div>
+  <div class="bp-gauge-labels">
+    <span>Hipotensão</span>
+    <span>Normal</span>
+    <span>Elevada</span>
+    <span>Estágio 1</span>
+    <span>Estágio 2</span>
+    <span>Crise</span>
+  </div>
+
+  <div class="bp-recommend {{ 'is-alert' if pressao.is_hipertenso or pressao.categoria_chave == 'crise_hipertensiva' or pressao.categoria_chave == 'hipotensao' }}">
+    <strong>Faixa de referência:</strong> {{ pressao.faixa_referencia }}<br>
+    <strong>Orientação:</strong> {{ pressao.recomendacao }}
+  </div>
+  <p class="form-hint" style="margin-top:12px;">Classificação por regras clínicas (faixas de PAS/PAD), não pelo modelo de machine learning — informativo, não substitui avaliação médica.</p>
+</div>
+
 <div class="section-title">Sinais vitais informados</div>
 <div class="vitals-strip" style="margin-bottom: 24px;">
   <div class="cell"><div class="v">{{ triagem.temperatura }}°</div><div class="l">Temp.</div></div>

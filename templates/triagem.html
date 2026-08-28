@@ -22,11 +22,17 @@
       </div>
       <div class="form-group">
         <label for="pas">Pressão arterial sistólica (mmHg)</label>
-        <input type="number" id="pas" name="pas" value="{{ form.pas or '120' }}" required>
+        <input type="number" id="pas" name="pas" value="{{ form.pas or '120' }}" oninput="atualizarPressaoLive()" required>
       </div>
       <div class="form-group">
         <label for="pad">Pressão arterial diastólica (mmHg)</label>
-        <input type="number" id="pad" name="pad" value="{{ form.pad or '80' }}" required>
+        <input type="number" id="pad" name="pad" value="{{ form.pad or '80' }}" oninput="atualizarPressaoLive()" required>
+      </div>
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <div id="bp-live" class="bp-live">
+          <span class="bp-live-dot" id="bp-live-dot"></span>
+          <span>Classificação da pressão: <strong id="bp-live-texto">—</strong></span>
+        </div>
       </div>
       <div class="form-group">
         <label for="consciencia">Nível de consciência</label>
@@ -65,4 +71,53 @@
     <a class="btn btn-secondary" href="{{ url_for('pacientes_lista') }}">Cancelar</a>
   </div>
 </form>
+
+<script>
+  // Classificação de pressão arterial em tempo real (mesmas faixas usadas no
+  // servidor, em ia_processamento.classificar_pressao_arterial). Isso dá
+  // retorno instantâneo ao profissional enquanto ele digita, sem precisar
+  // enviar o formulário.
+  const BP_CATEGORIAS = [
+    { chave: "hipotensao",         nome: "Hipotensão",              cor: "#2b7de9" },
+    { chave: "normal",             nome: "Normal",                   cor: "#2f9e44" },
+    { chave: "elevada",            nome: "Elevada",                  cor: "#e6b800" },
+    { chave: "hipertensao_1",      nome: "Hipertensão Estágio 1",    cor: "#f4772e" },
+    { chave: "hipertensao_2",      nome: "Hipertensão Estágio 2",    cor: "#d7263d" },
+    { chave: "crise_hipertensiva", nome: "Crise Hipertensiva",       cor: "#7f0f20" },
+  ];
+
+  function classificarPressaoLive(pas, pad) {
+    if (isNaN(pas) || isNaN(pad)) return null;
+    if (pas > 180 || pad > 120) return BP_CATEGORIAS[5];
+    if (pas >= 140 || pad >= 90) return BP_CATEGORIAS[4];
+    if (pas >= 130 || pad >= 80) return BP_CATEGORIAS[3];
+    if (pas >= 120 && pad < 80) return BP_CATEGORIAS[2];
+    if (pas < 90 || pad < 60) return BP_CATEGORIAS[0];
+    return BP_CATEGORIAS[1];
+  }
+
+  function atualizarPressaoLive() {
+    const pas = parseInt(document.getElementById('pas').value, 10);
+    const pad = parseInt(document.getElementById('pad').value, 10);
+    const cat = classificarPressaoLive(pas, pad);
+    const box = document.getElementById('bp-live');
+    const dot = document.getElementById('bp-live-dot');
+    const texto = document.getElementById('bp-live-texto');
+
+    if (!cat) {
+      texto.textContent = '—';
+      dot.style.background = 'var(--accent)';
+      box.style.borderColor = 'var(--line)';
+      box.style.background = '#fafcfb';
+      return;
+    }
+
+    texto.textContent = `${cat.nome} (${pas}/${pad} mmHg)`;
+    dot.style.background = cat.cor;
+    box.style.borderColor = cat.cor;
+    box.style.background = cat.cor + '14'; // leve transparência
+  }
+
+  document.addEventListener('DOMContentLoaded', atualizarPressaoLive);
+</script>
 {% endblock %}

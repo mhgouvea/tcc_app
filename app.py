@@ -13,7 +13,7 @@ armazenamento.
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import database as db
-from ia_processamento import get_motor, SINTOMAS, SINTOMAS_LABELS
+from ia_processamento import get_motor, SINTOMAS, SINTOMAS_LABELS, classificar_pressao_arterial
 
 app = Flask(__name__)
 app.secret_key = "tcc-triagem-ia-chave-secreta-dev"  # apenas para uso local/demonstração
@@ -154,10 +154,12 @@ def triagem_resultado(triagem_id):
         return redirect(url_for("triagem_resultado", triagem_id=triagem_id))
 
     sintomas_marcados = [s for s in (triagem["sintomas"] or "").split(",") if s]
+    pressao = classificar_pressao_arterial(triagem["pas"], triagem["pad"])
     return render_template(
         "resultado.html",
         triagem=triagem,
         sintomas_marcados=[SINTOMAS_LABELS.get(s, s) for s in sintomas_marcados],
+        pressao=pressao,
     )
 
 
@@ -190,6 +192,7 @@ def api_classificar():
 
     motor = get_motor()
     resultado = motor.classificar(vitais, sintomas_selecionados)
+    resultado["pressao_arterial"] = classificar_pressao_arterial(vitais["pas"], vitais["pad"])
     return jsonify(resultado)
 
 

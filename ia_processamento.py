@@ -77,6 +77,111 @@ CONDICAO_LABELS = {
 }
 
 
+PRESSAO_CATEGORIAS = [
+    # (nome, nivel de severidade 0-5, cor, faixa mmHg exibida, recomendação)
+    {
+        "chave": "hipotensao",
+        "nome": "Hipotensão",
+        "nivel": 2,
+        "cor": "#2b7de9",
+        "faixa": "PAS < 90 ou PAD < 60",
+        "recomendacao": "Avaliar sinais de hipoperfusão (tontura, palidez, sudorese). Investigar causa.",
+    },
+    {
+        "chave": "normal",
+        "nome": "Normal",
+        "nivel": 0,
+        "cor": "#2f9e44",
+        "faixa": "PAS < 120 e PAD < 80",
+        "recomendacao": "Manter hábitos saudáveis. Reavaliação de rotina.",
+    },
+    {
+        "chave": "elevada",
+        "nome": "Elevada",
+        "nivel": 1,
+        "cor": "#e6b800",
+        "faixa": "PAS 120–129 e PAD < 80",
+        "recomendacao": "Reforçar orientações sobre dieta, atividade física e reduzir o sal. Reavaliar em breve.",
+    },
+    {
+        "chave": "hipertensao_1",
+        "nome": "Hipertensão Estágio 1",
+        "nivel": 3,
+        "cor": "#f4772e",
+        "faixa": "PAS 130–139 ou PAD 80–89",
+        "recomendacao": "Encaminhar para avaliação médica. Considerar mudança de estilo de vida e acompanhamento.",
+    },
+    {
+        "chave": "hipertensao_2",
+        "nome": "Hipertensão Estágio 2",
+        "nivel": 4,
+        "cor": "#d7263d",
+        "faixa": "PAS ≥ 140 ou PAD ≥ 90",
+        "recomendacao": "Encaminhar para avaliação médica prioritária. Provável necessidade de tratamento medicamentoso.",
+    },
+    {
+        "chave": "crise_hipertensiva",
+        "nome": "Crise Hipertensiva",
+        "nivel": 5,
+        "cor": "#7f0f20",
+        "faixa": "PAS > 180 e/ou PAD > 120",
+        "recomendacao": "URGÊNCIA: encaminhar imediatamente para atendimento médico. Verificar sinais de lesão de órgão-alvo.",
+    },
+]
+
+
+def classificar_pressao_arterial(pas: int, pad: int) -> dict:
+    """
+    Classifica a pressão arterial a partir dos valores de PAS (sistólica) e
+    PAD (diastólica), com base nas faixas de referência amplamente adotadas
+    por diretrizes de cardiologia (ex.: American Heart Association / SBC).
+
+    Esta é uma classificação por REGRAS CLÍNICAS (determinística), não um
+    modelo de machine learning - a categorização de pressão arterial segue
+    limiares médicos bem estabelecidos, então regras são o método correto
+    e mais transparente para essa tarefa (diferente da priorização de
+    triagem, que usa o modelo Random Forest treinado).
+
+    Retorna um dicionário com a categoria, nível de severidade (0-5),
+    cor de referência, faixa de valores e uma recomendação textual.
+
+    IMPORTANTE: aviso educacional apenas - não substitui avaliação médica.
+    """
+    pas = int(pas)
+    pad = int(pad)
+
+    if pas > 180 or pad > 120:
+        cat = PRESSAO_CATEGORIAS[5]
+    elif pas >= 140 or pad >= 90:
+        cat = PRESSAO_CATEGORIAS[4]
+    elif pas >= 130 or pad >= 80:
+        cat = PRESSAO_CATEGORIAS[3]
+    elif pas >= 120 and pad < 80:
+        cat = PRESSAO_CATEGORIAS[2]
+    elif pas < 90 or pad < 60:
+        cat = PRESSAO_CATEGORIAS[0]
+    else:
+        cat = PRESSAO_CATEGORIAS[1]
+
+    is_hipertenso = cat["chave"] in ("hipertensao_1", "hipertensao_2", "crise_hipertensiva")
+
+    # Posição (0-100%) numa régua visual de 60 a 200 mmHg de PAS, para a barra de gauge
+    gauge_pct = max(0, min(100, round((pas - 60) / (200 - 60) * 100)))
+
+    return {
+        "categoria": cat["nome"],
+        "categoria_chave": cat["chave"],
+        "nivel": cat["nivel"],
+        "cor": cat["cor"],
+        "faixa_referencia": cat["faixa"],
+        "recomendacao": cat["recomendacao"],
+        "is_hipertenso": is_hipertenso,
+        "gauge_pct": gauge_pct,
+        "pas": pas,
+        "pad": pad,
+    }
+
+
 class MotorTriagem:
     """Encapsula os modelos treinados e expõe o método de classificação."""
 
