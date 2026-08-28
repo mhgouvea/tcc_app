@@ -95,5 +95,3 @@ console ao final do treinamento.
 - Geração de relatórios administrativos/gerenciais a partir do histórico.
 - Ajustes de segurança e conformidade com a LGPD antes de qualquer uso com
   dados reais de pacientes.
-- Re-treinamento periódico do modelo com novos dados (quando/se validado
-  clinicamente).
